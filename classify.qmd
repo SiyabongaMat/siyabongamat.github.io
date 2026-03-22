@@ -1,0 +1,31 @@
+---
+title: "Classify an Animal"
+format: html
+---
+
+<input id="photo" type="file">
+<button id="btn">Classify Image</button>
+<div id="results"></div>
+
+<script type="module">
+    import { Client } from 'https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js';
+    async function classifyImage(file)
+    {
+        const client = await Client.connect("siyalizo/animal_classification")
+        const res = await client.predict("/classify_images", {
+            image: file
+        })
+        results.innerHTML = `<br><img src="${URL.createObjectURL(file)}" width="300px"><p>${res.data[0]['label']}</p>`;
+    }
+    function read()
+    {
+        const file = photo.files[0]
+        if (!file)
+        {
+            alert("Please select a file first.")
+            return
+        }
+        classifyImage(file)
+    }
+    btn.addEventListener('click', read)
+</script>

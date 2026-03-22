@@ -4,16 +4,13 @@ image: profile.jpg
 about:
   template: jolla
   links:
-    - icon: bluesky
-      text: Bluesky
-      href: https://bsky.app/
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://www.linkedin.com/in/siyabonga-mathikge-15400214b/
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/SiyabongaMat
 
 ---
 
-About this blog
+This is a portfolio website built using Quarto. It serves as a platform to share my projects, insights and journey in the field of data science and machine learning. Enjoy exploring the projects and feel free to connect with me on LinkedIn or GitHub! 😎
