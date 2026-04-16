@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://siyabongamat.github.io/posts/hello-world/index.html</loc>
-    <lastmod>2026-03-20T15:57:37.088Z</lastmod>
+    <loc>https://siyabongamat.github.io/posts/object-counting/post.html</loc>
+    <lastmod>2026-04-16T19:26:12.854Z</lastmod>
   </url>
   <url>
-    <loc>https://siyabongamat.github.io/classify.html</loc>
-    <lastmod>2026-03-22T15:03:19.184Z</lastmod>
+    <loc>https://siyabongamat.github.io/index.html</loc>
+    <lastmod>2026-03-20T15:36:18.181Z</lastmod>
   </url>
   <url>
     <loc>https://siyabongamat.github.io/about.html</loc>
     <lastmod>2026-03-22T12:37:41.740Z</lastmod>
   </url>
   <url>
-    <loc>https://siyabongamat.github.io/index.html</loc>
-    <lastmod>2026-03-20T15:36:18.181Z</lastmod>
+    <loc>https://siyabongamat.github.io/classify.html</loc>
+    <lastmod>2026-03-22T15:03:19.184Z</lastmod>
+  </url>
+  <url>
+    <loc>https://siyabongamat.github.io/posts/hello-world/index.html</loc>
+    <lastmod>2026-04-16T16:17:46.077Z</lastmod>
   </url>
 </urlset>

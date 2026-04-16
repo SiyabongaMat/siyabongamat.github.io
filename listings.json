@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/object-counting/post.html",
       "/posts/hello-world/index.html"
     ]
   }
