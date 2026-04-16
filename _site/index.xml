@@ -10,7 +10,162 @@
 <atom:link href="https://siyabongamat.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog built with Quarto</description>
 <generator>quarto-1.9.36</generator>
-<lastBuildDate>Thu, 19 Mar 2026 22:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 15 Apr 2026 22:00:00 GMT</lastBuildDate>
+<item>
+  <title>Computer Vision for Object Counting</title>
+  <dc:creator>Siyabonga Mathikge</dc:creator>
+  <link>https://siyabongamat.github.io/posts/object-counting/post.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Experimenting with object counting with Machine Learning and Computer vision using Ultralytics Yolo Models. This has always been a project I have wanted to embark on and here I will show how it is done. The steps are simple. If you to opt to rather read the documentation, follow the <a href="https://docs.ultralytics.com/quickstart/">Ultralytics website</a></p>
+<section id="how-to-get-started" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-get-started">How to get started</h2>
+<blockquote class="blockquote">
+<p>[!NOTE] This implementation is done using <em>Python</em></p>
+</blockquote>
+<p>Firstly, if you have not installed python, install it on the <a href="python.org">Python website</a></p>
+<p>Install the Ultralytics package &gt; pip install -U ultralytics</p>
+<p>Ultralytic’s Yolo models training and validation models use a <code>.yaml</code> file. The <code>yaml</code> file has the directory of the training, validation and test data separated into folders. This was all automatically done using a popular open source library <code>label-studio</code>. Follow this <a href="https://www.youtube.com/watch?v=r0RspiLG260">Youtube</a> video for a deeper step-by-step guide into using label-studio. For data collection, I used <code>bing_image_downloader</code> to download images from bing. You decide the sources you gain your data</p>
+<section id="what-not-to-do" class="level3">
+<h3 class="anchored" data-anchor-id="what-not-to-do">What not to do</h3>
+<p>When following the Youtube tutorial, I began seeing that label-studio has changed and simply exporting the labelled data in Yolo and not choosing the <code>Yolo (with images)</code> options, the results varied drastically. Be sure to select the <code>Yolo (with Images)</code> export option for reproducible results with the Youtube tutorial.</p>
+</section>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
+<p>To split the dataset into train, validate and test, run this code in you code editor</p>
+<pre><code>import shutil
+import random
+
+def split_dataset(src_images, src_labels, dst, splits=(0.7, 0.2, 0.1), seed=42):
+    random.seed(seed)
+    
+    images = [p for p in Path(src_images).glob("*") 
+            if p.suffix.lower() in [".jpg", ".jpeg", ".png"]]
+    random.shuffle(images)
+    
+    n = len(images)
+    train_end = int(n * splits[0])
+    val_end = train_end + int(n * splits[1])
+    
+    sets = {
+        "train": images[:train_end],
+        "val":   images[train_end:val_end],
+        "test":  images[val_end:]
+    }
+    
+    for split, files in sets.items():
+        (Path(dst) / "images" / split).mkdir(parents=True, exist_ok=True)
+        (Path(dst) / "labels" / split).mkdir(parents=True, exist_ok=True)
+        
+        for img in files:
+            shutil.copy(img, Path(dst) / "images" / split / img.name)
+            lbl = Path(src_labels) / img.with_suffix(".txt").name
+            if lbl.exists():
+                shutil.copy(lbl, Path(dst) / "labels" / split / lbl.name)
+        
+        print(f"{split}: {len(files)} images")</code></pre>
+<p>When running the function about the parameters * <code>src_images</code> is the file destination where the exported Yolo data is named <code>images</code> * <code>src_labels</code> is the folder destination in the exported Yolo data named <code>labels</code> * <code>dst</code> is the folder name where all of the split data will be stored</p>
+<p>If you use <code>bing_image_downloader</code> to get data images, you might download .webp images. If that is the case, include that file name extension among the other image file extensions.</p>
+</section>
+<section id="create-.yaml-file" class="level2">
+<h2 class="anchored" data-anchor-id="create-.yaml-file">Create .yaml file</h2>
+<p>To create the .yaml file that will be used to train the model, run this code</p>
+<pre><code>import yaml
+
+def create_yaml(dataset_path, classes_txt):
+    with open(classes_txt) as f:
+        class_names = [line.strip() for line in f if line.strip()]
+    
+    data = {
+        "path": str(Path(dataset_path).resolve()),
+        "train": "images/train",
+        "val":   "images/val",
+        "test":  "images/test",
+        "nc":    len(class_names),
+        "names": class_names
+    }
+    
+    yaml_path = Path(dataset_path) / "data.yaml"
+    with open(yaml_path, "w") as f:
+        yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+    
+    print(f"Created data.yaml with {len(class_names)} classes: {class_names}")
+
+create_yaml("dataset_t/", "data/classes.txt")</code></pre>
+</section>
+<section id="training-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="training-the-model">Training the model</h2>
+<p>To train the model is simple from here, just copy and paste this block of code:</p>
+<pre><code>model = YOLO('yolo11n.pt')
+
+results = model.train(data='location/for/data.yaml', epochs=100, imgsz=640)</code></pre>
+<p>Ultralytics has a large catalogue of models to choose from, each with varying perfomance (comparison image below). <img src="https://siyabongamat.github.io/posts/object-counting/performance-comparison.png" class="img-fluid" alt="Comparison image for yolo models"> <sub>Source: Ultralytics</sub></p>
+<p>I chose <code>yolo11n.pt</code> because it was a lightweight version and used a lot in their example code. Running the code above will download the <code>yolo11n</code> model as well as the <code>yolo26n</code> model into your system.</p>
+<p>Quick breakdown of the code above: * <code>data=</code> is where the data.yaml file is stored. Yours may not even be named data, but the location for the .yaml file created with the previoius code block * <code>epochs</code> for the number of times you wish for the model to go through your data * <code>imgsz</code> means the image size. The default size from the documentation is 640. This is an optional parameter though</p>
+<p>Your data is being trained on a pre-trained model. Pre-trained models are used because they require less resources to train and quickly pick up on your labelled data. The model is not actually being trained, but rather is being finetuned. There is an option to completely train a model from scratch, but this path is generally not recommended unless you have extra resources to spare.</p>
+</section>
+<section id="what-comes-next" class="level2">
+<h2 class="anchored" data-anchor-id="what-comes-next">What comes next</h2>
+<p>Running this command will create a new folder named <code>runs</code>. That folder will have all the metrics for model performance, as well as a newly created model with the best performing weights as a <code>.pt</code> file. You will find it in this directory: <code>runs/detect/train/weights/best.pt</code>. This will be the model you will use to count objects trained on the model, as this is the model that will be able to detect your data.</p>
+<p>Use the <code>best.pt</code> model to predict on new and unseen data like so &gt; model.predict(‘any_image.webp’, save=True, conf=0.25)</p>
+<p>The <code>save=True</code> saves the prediction into a new folder <code>\runs\detect\predict</code></p>
+</section>
+<section id="object-counting" class="level2">
+<h2 class="anchored" data-anchor-id="object-counting">Object Counting</h2>
+<p>The final step. This section is very simple to implement as shown by the docs <a href="https://docs.ultralytics.com/guides/object-counting/">Object Counting</a>. This is how I implemented object count in my project</p>
+<pre><code>from ultralytics import solutions
+import cv2
+
+cap = cv2.VideoCapture('0412(7).mp4')
+assert cap.isOpened(), "Error loading video stream"
+
+region_points = [(664, 978), (1023, 835), (918, 433), (426, 266), (304, 668)]
+
+w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))
+video_writer = cv2.VideoWriter("object_detection_output.avi", cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+
+counter = solutions.ObjectCounter(
+    show=True,
+    region=region_points,
+    model='runs/detect/train/weights/best.pt'
+)
+
+while cap.isOpened():
+    success, im0 = cap.read()
+
+    if not success:
+        print("Video frame is empty or processing complete")
+        break
+
+    results = counter(im0)
+
+    video_writer.write(results.plot_im)
+
+cap.release()
+video_writer.release()
+cv2.destroyAllWindows()</code></pre>
+<p>The Yolo models are able to run even on video input, as shown by the code example above. The region points is the region you want the objects to be counted in. The regions according to the documentation are either linear, rectangular and polygon.</p>
+<p>The <em>linear</em> counts models that cross a certain line in the video. It is up to you whether the line is horizontal or vertical. The rectangular and polygonal regions counts objects as they enter or exit a region. From my observation, an object counts as <strong>IN</strong> when they enter the shape from the leftmost point, and they count as <strong>OUT</strong> as they exit the shape from the rightmost point, same with the line region. When an object moves from right to left the object is counted as <strong>OUT</strong> and from left to right it is an <strong>IN</strong> object.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This has been an interesting project to play around with and has been particularly fun. I hope to do more projects like this and play around with it and see what is possible. There is a myriade of solutions that can be created with this to solve today’s problem and fill the gap in today’s need, until then…see ya 😎🚀</p>
+
+
+</section>
+
+ ]]></description>
+  <category>yolo</category>
+  <category>object counting</category>
+  <category>computer vision</category>
+  <guid>https://siyabongamat.github.io/posts/object-counting/post.html</guid>
+  <pubDate>Wed, 15 Apr 2026 22:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Hello World</title>
   <dc:creator>Siyabonga Mathikge</dc:creator>
@@ -22,7 +177,9 @@
 
 
 <section id="hello-world" class="level1">
-
+<h1>Hello World</h1>
+<p>A quick intro to this blog.</p>
+<p>This is a blog about my journey in all things Machine Learning, Data Science, and then some. Introductory blog; the first blog post for what’s to come. Experience my journey with me and take note of my learnings, and my experimentations in this vast world of <em>Machine Learning</em></p>
 
 
 </section>
